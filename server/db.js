@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
  * Create a schema for Article, User, Category
  * Create a Model by using the schema defined above
  * this value defaults the name of the collection to plural of model name i.e Article.
- * @type {{Article: *, User: *, Category: *}}
+ * @type {{Article: *, User: *, Category: *, Follow: *}}
  */
 const ArticleSchema = new Schema({
     title:      {type:String, require:true},
@@ -34,6 +34,24 @@ const CategorySchema = new Schema({
     created:    {type:Date}
 });
 
+const FollowSchema = new Schema({
+    name:       {type:String, required:true},
+    follower:   {
+        type:[{
+            name:   {type:String, required:true},
+            email:  {type:String, required:true}
+        }], 
+        required:true
+    },
+    following:  {
+        type:[{
+            name:   {type:String, required:true},
+            email:  {type:String, required:true},
+        }], 
+        required:true
+    }
+});
+
 //MD5密码和原密码匹配
 UserSchema.methods.verifyPassword= function(password){
     let isMatch= md5(password)=== this.password;
@@ -45,6 +63,7 @@ const Models={
     Article : mongoose.model('Article', ArticleSchema),
     User : mongoose.model('User', UserSchema),
     Category : mongoose.model('Category', CategorySchema),
+    Follow : mongoose.model('Follow', FollowSchema),
     verify : UserSchema.methods.verifyPassword
 };
 
