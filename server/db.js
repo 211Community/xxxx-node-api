@@ -25,17 +25,7 @@ const UserSchema = new Schema({
     name:       {type:String, require:true},
     email:      {type:String, require:true},
     password:   {type:String, require:true},
-    created:    {type:Date}
-});
-
-const CategorySchema = new Schema({
-    name:      {type:String, require:true},
-    slug:       {type:String, require:true},
-    created:    {type:Date}
-});
-
-const FollowSchema = new Schema({
-    name:       {type:String, required:true},
+    created:    {type:Date},
     follower:   {
         type:[{
             name:   {type:String, required:true},
@@ -52,6 +42,12 @@ const FollowSchema = new Schema({
     }
 });
 
+const CategorySchema = new Schema({
+    name:      {type:String, require:true},
+    slug:       {type:String, require:true},
+    created:    {type:Date}
+});
+
 //MD5密码和原密码匹配
 UserSchema.methods.verifyPassword= function(password){
     let isMatch= md5(password)=== this.password;
@@ -63,7 +59,6 @@ const Models={
     Article : mongoose.model('Article', ArticleSchema),
     User : mongoose.model('User', UserSchema),
     Category : mongoose.model('Category', CategorySchema),
-    Follow : mongoose.model('Follow', FollowSchema),
     verify : UserSchema.methods.verifyPassword
 };
 
