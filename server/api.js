@@ -13,6 +13,189 @@ const db = require('./db');
  */
 
 let n=0;  //for trace output
+
+/**
+ * 前台后台查询当前关注的人
+ * type:get
+ * Parameters: /following/:id
+ * Respense:{
+ *      name:string
+        result:[{
+            name:string,
+            email:string
+        }],
+        userCount:n
+ * }
+ */
+router.get('/following', function(req, res, next){
+    if(!req.params.name){
+        return next(new Error('未提供查询字段'));
+    }
+
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.User.findOne(conditions)
+        .exec(function(err, result){
+        console.log('get user following '+ n++, 'params: '+JSON.stringify(req.params));
+        if ( err ) throw err;
+
+        let back = {
+            name = result.name,
+            result = result.following,
+            userCount = result.following.length
+        };
+        res.status(200).send(JSON.stringify(back)).end();
+    });
+});
+
+/**
+ * 前台后台查询当前关注用户的人
+ * type:get
+ * Parameters: /follower/:id
+ * Respense:{
+ *      name:string,
+        result:[{
+            name:string,
+            email:string
+        }],
+        userCount:n
+ * }
+ */
+router.get('/follower', function(req, res, next){
+    if(!req.params.name){
+        return next(new Error('未提供查询字段'));
+    }
+
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.User.findOne(conditions)
+        .exec(function(err, result){
+        console.log('get user follower '+ n++, 'params: '+JSON.stringify(req.params));
+        if ( err ) throw err;
+
+        let back = {
+            name = result.name,
+            result = result.follower,
+            userCount = result.follower.length
+        };
+        res.status(200).send(JSON.stringify(back)).end();
+    });
+});
+
+/**
+ * 前台后台查询当前关注情况
+ * type:get
+ * Parameters: /following/:id
+ * Respense:{
+ *      result:{
+            name:string,
+            following:[{
+                name:string,
+                email:string
+            }],
+            follower:[{
+                name:string,
+                email:string
+            }]
+        }
+ * }
+ */
+router.get('/following', function(req, res, next){
+    if(!req.params.name){
+        return next(new Error('未提供查询字段'));
+    }
+
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.User.findOne(conditions)
+        .exec(function(err, result){
+        console.log('get user follow condition '+ n++, 'params: '+JSON.stringify(req.params));
+        if ( err ) throw err;
+
+        let back = {
+            name = result.name,
+            following = result.following,
+            follower = result.follower
+        }
+        res.status(200).send(JSON.stringify(back)).end();
+    });
+});
+
+/**
+ * 前台关注某人
+ * type:post
+ * Parameters: /following/:id
+ */
+router.post('/following', requireLogin, function(req, res, next){
+    if(!req.params.id){
+        return next(new Error('未提供操作条目'));
+    }
+
+    var id = req.body.id;
+    var name = req.body.name;
+    var email = req.body.email;
+
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.User.updateOne(conditions, {'$push': {following: {id = id, name = name, email = email}}})
+        .exec(function(err, result){
+        console.log('add following '+ n++, 'params: '+JSON.stringify(req.params));
+        
+        if ( err ) throw next(err);
+        res.status(200).send(JSON.stringify(result)).end();
+    });
+});
+
+/**
+ * 前台取消关注某人
+ * type:post
+ * Parameters: /following/:id
+ */
+router.put('/following', requireLogin, function(req, res, next){
+    if(!req.params.id){
+        return next(new Error('未提供操作条目'));
+    }
+
+    var id = req.body.id;
+    var name = req.body.name;
+    var email = req.body.email;
+
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.User.updateOne(conditions, {'$pull': {following: {id = id, name = name, email = email}}})
+        .exec(function(err, result){
+        console.log('add following '+ n++, 'params: '+JSON.stringify(req.params));
+        
+        if ( err ) throw next(err);
+        res.status(200).send(JSON.stringify(result)).end();
+    });
+});
+
 /**
  * 前台 查全部文章
  * sort by created
@@ -62,9 +245,38 @@ router.get('/article', function(req, res, next){
 });
 
 /**
+ * 前台查找关注者的文章
+ * type:get
+ * Parameters: /article/follow/id
+ */
+router.get('/article/follow/:id', getFollowingById, function(req, res, next){
+    if(!req.params.id){
+        return next(new Error('未提供查询字段'));
+    }
+
+    const following = req.result;
+    let conditions={}; //转换成slug链接 方便SEO
+    try{
+        conditions._id=mongoose.Types.ObjectId(req.params.id);
+    }catch(err){
+        conditions.slug=req.params.id;
+    }
+
+    db.Article.find({author: { '$each': following }, published:true})
+            .sort('created')
+            .populate('author')
+            .populate('category')
+            .exec(function (err, articles) {
+                if ( err ) throw next(err);
+
+                res.status(200).send(articles).end();
+            });
+});
+
+/**
  * 前台查一个文章
  * type:get
- * Parameters: /articel/id || /article/slug
+ * Parameters: /article/id || /article/slug
  * Response:{Article}
  */
 router.get('/article/:id', function(req, res, next){
@@ -225,7 +437,7 @@ router.post("/article", requireLogin, function(req, res){
             }
 
         });
-    })
+    });
 });
 
 /**
@@ -575,6 +787,28 @@ function  getAritcleById(req,res,next) {
                 return next(new Error('article not found: ', id));
             }
             req.result=result;
+            next();
+        });
+}
+
+/**
+ * Middleware 通过ID查找关注的人
+ */
+function getFollowingById(req,res,next) {
+    let id=req.params.id;
+    if(!id) {
+        return next(new Error('未提供查询字段'));
+    }
+
+    db.User.findOne({_id: id})
+        .exec(function(err, result){
+            if ( err ) {
+                throw err;
+            }
+            if(!result){
+                return next(new Error('user not found: ', id));
+            }
+            req.result=result.following;
             next();
         });
 }
