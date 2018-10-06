@@ -350,12 +350,12 @@ router.get('/favorite/:id', function(req, res, next){
 
             result.meta.favorites=result.meta.favorites ? result.meta.favorites+1 : 1;
             result.markModified('meta');
-            result.save(function(err){
+            result.save(function(err, msg){
                 if ( err ) throw err;
                 console.log('add article dianzan '+ n++);
 
-                //后端重定向标记
-                res.status(200).redirect('/userArticle/?id=' + result.slug);
+                //res.status(200).redirect('/userArticle/?id=' + result.slug);
+                res.status(200).send(JSON.stringify(msg)).end();
             });
         });
 });
@@ -392,12 +392,12 @@ router.post('/comment/:id', function(req, res, next){
         result.comments.unshift(comment);
         result.markModified('comments');
 
-        result.save(function(err){
+        result.save(function(err, msg){
             if ( err ) throw err;
             console.log('add article comment '+ n++);
 
-            //后端重定向标记
-            res.redirect('/userArticle/?id=' + result.slug);
+            //res.redirect('/userArticle/?id=' + result.slug);
+            res.status(200).send(JSON.stringify(msg)).end();
         });
     });
 });
@@ -864,10 +864,8 @@ function  getCategoryById(req,res,next) {
  * 使用passport模块
  */
 router.post('/login', passport.authenticate('local', {
-    
-        //后端重定向标记
-        failureRedirect: '/login',
-        failureFlash: '用户名或密码错误'
+        //failureRedirect: '/login',
+        //failureFlash: '用户名或密码错误'
     }), function(req, res, next){
     res.status(200).send(JSON.stringify(req.body));
     console.log('user login success: '+JSON.stringify(req.body));
