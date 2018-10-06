@@ -1,9 +1,12 @@
 {
-  "name": "xxxx",
-  "description": "Blog content management syestem build by nodejs",
-  "author": "211",
+  "name": "blogcms",
+  "description": "Blog content management syestem build by nodejs and vue2.0",
+  "author": "flytiger",
   "private": true,
   "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --inline --hot",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "watch": "webpack --progress --color --watch",
     "server": "node ./server/server"
   },
   "dependencies": {
@@ -25,7 +28,11 @@
     "pinyin": "^2.8.0",
     "serve-favicon": "^2.3.0",
     "slug": "^0.9.1",
-    "truncate": "^2.0.0"
+    "truncate": "^2.0.0",
+    "vue": "^2.0.1",
+    "vue-resource": "^1.0.3",
+    "vue-router": "^2.0.1",
+    "vuex": "^2.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
@@ -44,6 +51,14 @@
     "file-loader": "^0.9.0",
     "json-loader": "^0.5.4",
     "morgan": "^1.7.0",
-    "supervisor": "^0.11.0"
+    "supervisor": "^0.11.0",
+    "vue-animated-list": "^1.0.2",
+    "vue-hot-reload-api": "^2.0.6",
+    "vue-html-loader": "^1.2.3",
+    "vue-loader": "^9.7.0",
+    "vue-style-loader": "^1.0.0",
+    "vue-validator": "^3.0.0-alpha.1",
+    "webpack": "^2.1.0-beta.25",
+    "webpack-dev-server": "^2.1.0-beta.0"
   }
 }

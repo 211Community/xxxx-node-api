@@ -45,9 +45,9 @@ router.get('/following', function(req, res, next){
         if ( err ) throw err;
 
         let back = {
-            name = result.name,
-            result = result.following,
-            userCount = result.following.length
+            name: result.name,
+            result: result.following,
+            userCount: result.following.length
         };
         res.status(200).send(JSON.stringify(back)).end();
     });
@@ -84,9 +84,9 @@ router.get('/follower', function(req, res, next){
         if ( err ) throw err;
 
         let back = {
-            name = result.name,
-            result = result.follower,
-            userCount = result.follower.length
+            name: result.name,
+            result: result.follower,
+            userCount: result.follower.length
         };
         res.status(200).send(JSON.stringify(back)).end();
     });
@@ -128,9 +128,9 @@ router.get('/following', function(req, res, next){
         if ( err ) throw err;
 
         let back = {
-            name = result.name,
-            following = result.following,
-            follower = result.follower
+            name: result.name,
+            following: result.following,
+            follower: result.follower
         }
         res.status(200).send(JSON.stringify(back)).end();
     });
@@ -157,7 +157,7 @@ router.post('/following', requireLogin, function(req, res, next){
         conditions.slug=req.params.id;
     }
 
-    db.User.updateOne(conditions, {'$push': {following: {id = id, name = name, email = email}}})
+    db.User.updateOne(conditions, {'$push': {following: {id: id, name: name, email: email}}})
         .exec(function(err, result){
         console.log('add following '+ n++, 'params: '+JSON.stringify(req.params));
         
@@ -187,7 +187,7 @@ router.put('/following', requireLogin, function(req, res, next){
         conditions.slug=req.params.id;
     }
 
-    db.User.updateOne(conditions, {'$pull': {following: {id = id, name = name, email = email}}})
+    db.User.updateOne(conditions, {'$pull': {following: {id: id, name: name, email: email}}})
         .exec(function(err, result){
         console.log('add following '+ n++, 'params: '+JSON.stringify(req.params));
         
@@ -205,7 +205,7 @@ router.put('/following', requireLogin, function(req, res, next){
  * slice the pages : curPage-current page; pageSize-count pre page; pageCount-total pages
  *
  * type:get
- * Parameters: /articel?page=n
+ * Parameters: /article?page=n
  * Response:{
  *      result:[{Article}],
         pageCount:n,
@@ -245,9 +245,14 @@ router.get('/article', function(req, res, next){
 });
 
 /**
- * 前台查找关注者的文章
+ * 前台 查找关注者的文章
  * type:get
- * Parameters: /article/follow/id
+ * Parameters: /article/follow/id?page=n
+ *  * Response:{
+ *      result:[{Article}],
+        pageCount:n,
+        curPage:n,
+ * }
  */
 router.get('/article/follow/:id', getFollowingById, function(req, res, next){
     if(!req.params.id){
@@ -262,15 +267,30 @@ router.get('/article/follow/:id', getFollowingById, function(req, res, next){
         conditions.slug=req.params.id;
     }
 
-    db.Article.find({author: { '$each': following }, published:true})
-            .sort('created')
-            .populate('author')
-            .populate('category')
-            .exec(function (err, articles) {
-                if ( err ) throw next(err);
+    db.Article.find({author: { '$in': following }, published: true})
+        .sort('created')
+        .populate('author')
+        .populate('category')
+        .exec(function (err, result) {
+            console.log('get article list ' + n++ + ', author ' + following, 'cur page: ' + JSON.stringify(req.query));
 
-                res.status(200).send(articles).end();
-            });
+            if (err) throw next(err);
+            let curPage = Math.abs(parseInt(req.query.page || 1, 10));
+            let pageSize = 10;
+            let totalCount = result.length;
+            let pageCount = Math.ceil(totalCount / pageSize);
+
+            if (curPage > pageCount) curPage = pageCount;
+
+            let back = {
+                result: result.slice((curPage - 1) * pageSize, curPage * pageSize),
+                pageCount: pageCount,
+                curPage: curPage,
+                pretty: true
+            };
+
+            res.status(200).send(back).end();
+        });
 });
 
 /**
@@ -585,7 +605,7 @@ router.post("/category", requireLogin, function(req, res){
                 res.status(200).send(JSON.stringify(result)).end();
             }
         });
-    })
+    });
 });
 
 
@@ -678,7 +698,7 @@ router.get('/category/:id', function(req, res, next){
                 if ( err ) throw next(err);
 
                 res.status(200).send(articles).end();
-            })
+            });
     });
 });
 

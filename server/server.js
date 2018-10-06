@@ -19,14 +19,17 @@ const session=require('express-session');
 const passport = require('passport');
 const MongoStore = require('connect-mongo')(session);
 const User = require('./db').User;
+//const flash=require('connect-flash');
+//const messages=require('express-messages');
 
 /*
- * 监听3000端口
+ * 监听3300端口
  * 用JSON格式处理bodyParser请求
  */
-app.set('port', (process.env.port || 3000));
+app.set('port', (process.env.port || 3300));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+//app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 app.use(session({
@@ -38,6 +41,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+//app.use(flash());
 
 //session显示出来
 app.use(function (req, res, next) {
@@ -90,10 +94,10 @@ app.use(api);   //最好放在下边
  * 设置静态资源目录为dist
  * 排除api接口的路由，向浏览器发送根文件
  */
-app.use('/dist', express.static(resolve('./dist')));
+app.use('/dist', express.static(resolve('../dist')));
 app.get('*', function (req, res, next) {
     if(req.originalUrl.indexOf('/article')!=0 || req.originalUrl.indexOf('/category')!=0 || req.originalUrl.indexOf('/favorite')!=0) {
-        const html = fs.readFileSync(resolve('./index.html'), 'utf-8');
+        const html = fs.readFileSync(resolve('../index.html'), 'utf-8');
         res.send(html);
     }else{
         next();
@@ -103,6 +107,3 @@ app.get('*', function (req, res, next) {
 app.listen(app.get('port'), function(){
     console.log('Server up: http://localhost:' + app.get('port'));
 });
-
-
-

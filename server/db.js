@@ -66,7 +66,7 @@ const Models={
  * 创建数据库名称并连接
  * Connecting to Mongod instance.
  */
-const dbHost = 'mongodb://112.74.207.160:27017/';
+const dbHost = 'mongodb://112.74.207.160:27017/nodeblog';
 mongoose.connect(dbHost);
 const db=mongoose.connection;
 db.on('error', function () {
