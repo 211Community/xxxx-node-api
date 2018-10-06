@@ -353,6 +353,8 @@ router.get('/favorite/:id', function(req, res, next){
             result.save(function(err){
                 if ( err ) throw err;
                 console.log('add article dianzan '+ n++);
+
+                //后端重定向标记
                 res.status(200).redirect('/userArticle/?id=' + result.slug);
             });
         });
@@ -393,7 +395,8 @@ router.post('/comment/:id', function(req, res, next){
         result.save(function(err){
             if ( err ) throw err;
             console.log('add article comment '+ n++);
-            //req.flash('info', '评论添加成功');
+
+            //后端重定向标记
             res.redirect('/userArticle/?id=' + result.slug);
         });
     });
@@ -861,6 +864,8 @@ function  getCategoryById(req,res,next) {
  * 使用passport模块
  */
 router.post('/login', passport.authenticate('local', {
+    
+        //后端重定向标记
         failureRedirect: '/login',
         failureFlash: '用户名或密码错误'
     }), function(req, res, next){
