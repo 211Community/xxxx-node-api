@@ -17,7 +17,7 @@ let n=0;  //for trace output
 /**
  * 前台后台查询当前关注的人
  * type:get
- * Parameters: /following/:id
+ * Parameters: /following/id
  * Respense:{
  *      name:string
         result:[{
@@ -27,8 +27,8 @@ let n=0;  //for trace output
         userCount:n
  * }
  */
-router.get('/following', function(req, res, next){
-    if(!req.params.name){
+router.get('/following/:id', function(req, res, next){
+    if(!req.params.id){
         return next(new Error('未提供查询字段'));
     }
 
@@ -56,7 +56,7 @@ router.get('/following', function(req, res, next){
 /**
  * 前台后台查询当前关注用户的人
  * type:get
- * Parameters: /follower/:id
+ * Parameters: /follower/id
  * Respense:{
  *      name:string,
         result:[{
@@ -66,8 +66,8 @@ router.get('/following', function(req, res, next){
         userCount:n
  * }
  */
-router.get('/follower', function(req, res, next){
-    if(!req.params.name){
+router.get('/follower/:id', function(req, res, next){
+    if(!req.params.id){
         return next(new Error('未提供查询字段'));
     }
 
@@ -95,7 +95,7 @@ router.get('/follower', function(req, res, next){
 /**
  * 前台后台查询当前关注情况
  * type:get
- * Parameters: /following/:id
+ * Parameters: /following/id
  * Respense:{
  *      result:{
             name:string,
@@ -110,8 +110,8 @@ router.get('/follower', function(req, res, next){
         }
  * }
  */
-router.get('/following', function(req, res, next){
-    if(!req.params.name){
+router.get('/follow/:id', function(req, res, next){
+    if(!req.params.id){
         return next(new Error('未提供查询字段'));
     }
 
@@ -139,14 +139,14 @@ router.get('/following', function(req, res, next){
 /**
  * 前台关注某人
  * type:post
- * Parameters: /following/:id
+ * Parameters: /following/id
  */
-router.post('/following', requireLogin, function(req, res, next){
+router.post('/following/:id', requireLogin, function(req, res, next){
     if(!req.params.id){
         return next(new Error('未提供操作条目'));
     }
 
-    var id = req.body.id;
+    var id = mongoose.Types.ObjectId(req.body.id);
     var name = req.body.name;
     var email = req.body.email;
 
@@ -169,14 +169,14 @@ router.post('/following', requireLogin, function(req, res, next){
 /**
  * 前台取消关注某人
  * type:post
- * Parameters: /following/:id
+ * Parameters: /following/id
  */
-router.put('/following', requireLogin, function(req, res, next){
+router.put('/following/:id', requireLogin, function(req, res, next){
     if(!req.params.id){
         return next(new Error('未提供操作条目'));
     }
 
-    var id = req.body.id;
+    var id = mongoose.Types.ObjectId(req.body.id);
     var name = req.body.name;
     var email = req.body.email;
 
@@ -247,14 +247,14 @@ router.get('/article', function(req, res, next){
 /**
  * 前台 查找关注者的文章
  * type:get
- * Parameters: /article/follow/id?page=n
+ * Parameters: /article/following/id?page=n
  *  * Response:{
  *      result:[{Article}],
         pageCount:n,
         curPage:n,
  * }
  */
-router.get('/article/follow/:id', getFollowingById, function(req, res, next){
+router.get('/article/following/:id', getFollowingById, function(req, res, next){
     if(!req.params.id){
         return next(new Error('未提供查询字段'));
     }
@@ -466,7 +466,7 @@ router.post("/article", requireLogin, function(req, res){
 /**
  * 后台修改文章时先查一个文章
  * type:get
- * Parameters: /edit/:id
+ * Parameters: /edit/id
  * Response:{Article}
  */
 router.get('/edit/:id', requireLogin, getAritcleById, function(req, res, next){
@@ -477,7 +477,7 @@ router.get('/edit/:id', requireLogin, getAritcleById, function(req, res, next){
 /**
  * 后台修改文章
  * type:put
- * Parameters: /article/:id
+ * Parameters: /article/id
  * Response:{Article}
  */
 router.put("/article/:id", requireLogin, getAritcleById, function(req, res, next){
@@ -525,7 +525,7 @@ router.put("/article/:id", requireLogin, getAritcleById, function(req, res, next
 /**
  * 后台删除文章
  * type:delect
- * Parameters: /article/:id
+ * Parameters: /article/id
  * Response:None
  */
 router.delete("/article/:id", requireLogin, function(req, res){
@@ -615,7 +615,7 @@ router.post("/category", requireLogin, function(req, res){
 /**
  * 后台修改分类时先查询分类
  * type:get
- * Parameters: /edit/:id
+ * Parameters: /edit/id
  * Response:{Article}
  */
 router.get('/category/edit/:id', requireLogin, getCategoryById, function(req, res, next){
@@ -893,6 +893,8 @@ router.post('/reg', function(req, res, next){
         name: email.split('@').shift(),
         email:email,
         password:md5(password),
+        follower: [],
+        following: [],
         created:new Date
     });
 

@@ -28,17 +28,19 @@ const UserSchema = new Schema({
     created:    {type:Date},
     follower:   {
         type:[{
+            id:     {type:Schema.Types.ObjectId, ref:'User'},
             name:   {type:String, required:true},
             email:  {type:String, required:true}
         }], 
-        required:true
+        required:false
     },
     following:  {
         type:[{
+            id:     {type:Schema.Types.ObjectId, ref:'User'},
             name:   {type:String, required:true},
             email:  {type:String, required:true},
         }], 
-        required:true
+        required:false
     }
 });
 
